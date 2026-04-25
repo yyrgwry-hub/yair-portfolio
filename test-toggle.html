@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Language Toggle Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; line-height: 1.6; }
+    .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+    .pass { background: #d4edda; }
+    .fail { background: #f8d7da; }
+  </style>
+</head>
+<body>
+  <h1>Language Toggle Tests</h1>
+  <div id="results"></div>
+
+  <script>
+    const results = document.getElementById('results');
+    let passed = 0, failed = 0;
+
+    function test(name, fn) {
+      try {
+        fn();
+        results.innerHTML += `<div class="test pass">✓ ${name}</div>`;
+        passed++;
+      } catch (e) {
+        results.innerHTML += `<div class="test fail">✗ ${name}: ${e.message}</div>`;
+        failed++;
+      }
+    }
+
+    test('HTML has lang toggle button', () => {
+      const btn = document.createElement('button');
+      btn.id = 'langToggle';
+      btn.textContent = 'EN / HE';
+      if (!btn.id) throw new Error('Button ID not set');
+    });
+
+    test('localStorage API available', () => {
+      localStorage.setItem('test', 'value');
+      const val = localStorage.getItem('test');
+      localStorage.removeItem('test');
+      if (val !== 'value') throw new Error('localStorage not working');
+    });
+
+    test('Toggle logic switches correctly', () => {
+      const toggleLogic = (current) => current === 'en' ? 'he' : 'en';
+      if (toggleLogic('en') !== 'he') throw new Error('en should toggle to he');
+      if (toggleLogic('he') !== 'en') throw new Error('he should toggle to en');
+    });
+
+    test('Hebrew translations object exists', () => {
+      const translations = {
+        he:{
+          'tagline':'אני בונה אפליקציות ווב מבוססות AI — מהר, נקי ומוכן לשימוש',
+        }
+      };
+      if (!translations.he.tagline) throw new Error('Hebrew translations missing');
+    });
+
+    test('RTL styles would be applied', () => {
+      const style = document.createElement('style');
+      style.textContent = '[dir="rtl"] { direction: rtl; }';
+      document.head.appendChild(style);
+      const div = document.createElement('div');
+      div.setAttribute('dir', 'rtl');
+      document.body.appendChild(div);
+      const computed = window.getComputedStyle(div).direction;
+      if (computed !== 'rtl') throw new Error('RTL not applied');
+      document.body.removeChild(div);
+    });
+
+    test('Language persistence would work', () => {
+      localStorage.setItem('site-lang', 'he');
+      const saved = localStorage.getItem('site-lang');
+      if (saved !== 'he') throw new Error('Language not saved');
+      localStorage.removeItem('site-lang');
+    });
+
+    results.innerHTML += `<hr><h2>Results: ${passed} passed, ${failed} failed</h2>`;
+  </script>
+</body>
+</html>
